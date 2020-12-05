@@ -1,7 +1,7 @@
 ### GET
     goxios.Get(goxios.Config{
         Url: "",
-    }).Then(func(res goxios.Axios) {
+    }).Then(func(res goxios.Goxios) {
     }).Catch(func(err error) {
     })
 
@@ -14,6 +14,6 @@
 			ContentType: "application/json",
 		},
         Data:map[string]interface{}{},
-    }).Then(func(res goxios.Axios) {
+    }).Then(func(res goxios.Goxios) {
     }).Catch(func(err error) {
     })

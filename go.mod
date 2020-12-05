@@ -1,3 +1,3 @@
-module github.com/Carseason/goxios
+module github.com/carseason/goxios
 
 go 1.14
