@@ -27,7 +27,7 @@ func TestPost(t *testing.T) {
 			Cookie:      "",
 			ContentType: ContentTypeJSON,
 		},
-		Data: map[string]interface{}{},
+		Data: nil,
 	}).Then(func(res Goxios) {
 		t.Log(res.StatusCode())
 
@@ -45,7 +45,7 @@ func TestPut(t *testing.T) {
 			Cookie:      "",
 			ContentType: ContentTypeJSON,
 		},
-		Data: map[string]interface{}{},
+		Data: nil,
 	}).Then(func(res Goxios) {
 		t.Log(res.StatusCode())
 	}).Catch(func(err error) {

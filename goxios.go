@@ -1,15 +1,11 @@
 package goxios
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"reflect"
 	"strings"
 )
 
@@ -25,7 +21,7 @@ type Config struct {
 	Method  string
 	Params  map[string]string
 	Headers Headers
-	Data    interface{}
+	Data    io.Reader
 }
 
 type Headers struct {
@@ -75,39 +71,6 @@ func (a *Goxios) setHeaders(header Headers) *Goxios {
 		a.res.Header.Add(k, v)
 	}
 	return a
-}
-
-//data
-func (a *Goxios) bodyReader(e string, data interface{}) (io.Reader, error) {
-	//"application/json"
-	if e == "" || strings.Contains(e, "json") {
-		bs, err := json.Marshal(data)
-		return bytes.NewBuffer(bs), err
-	}
-	//"application/x-www-form-urlencoded"
-	switch value := data.(type) {
-	case url.Values:
-		return strings.NewReader(value.Encode()), nil
-	case map[string]interface{}:
-		body := make(url.Values)
-		for k, v := range value {
-			body.Set(k, fmt.Sprintf("%v", v))
-		}
-		return strings.NewReader(body.Encode()), nil
-	case string:
-		return strings.NewReader(value), nil
-	default:
-		switch reflect.TypeOf(value).Kind() {
-		case reflect.Struct,
-			reflect.Map,
-			reflect.Slice,
-			reflect.Array:
-			bs, err := json.Marshal(value)
-			return bytes.NewBuffer(bs), err
-		default:
-			return strings.NewReader(""), nil
-		}
-	}
 }
 
 //do
@@ -206,15 +169,7 @@ func Request(c Config) (goxios *Goxios) {
 	case "GET":
 		goxios.res, goxios.err = http.NewRequest(method, uri, nil)
 	case "POST", "PUT", "DELETE":
-		if c.Headers.ContentType == "" {
-			c.Headers.ContentType = ContentTypeJSON
-		}
-		data, err := goxios.bodyReader(c.Headers.ContentType, c.Data)
-		if err != nil {
-			goxios.err = err
-			return
-		}
-		goxios.res, goxios.err = http.NewRequest(method, uri, data)
+		goxios.res, goxios.err = http.NewRequest(method, uri, c.Data)
 	default:
 		goxios.err = errors.New("not found method")
 		return
