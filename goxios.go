@@ -1,11 +1,14 @@
 package goxios
 
 import (
-	"errors"
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
 )
 
@@ -71,6 +74,50 @@ func (a *Goxios) setHeaders(header Headers) *Goxios {
 		a.res.Header.Add(k, v)
 	}
 	return a
+}
+
+//data
+func (a *Goxios) bodyReader(e string, data interface{}) (io.Reader, error) {
+	//"application/json"
+	if e == "" || strings.Contains(e, "json") {
+		switch value := data.(type) {
+		case string:
+			return bytes.NewBuffer([]byte(value)), nil
+		case []byte:
+			return bytes.NewBuffer(value), nil
+		case io.Reader:
+			return value, nil
+		default:
+			bs, err := json.Marshal(data)
+			return bytes.NewBuffer(bs), err
+		}
+
+	} else {
+		//"application/x-www-form-urlencoded"
+		switch value := data.(type) {
+		case url.Values:
+			return strings.NewReader(value.Encode()), nil
+		case map[string]interface{}:
+			body := make(url.Values)
+			for k, v := range value {
+				body.Set(k, fmt.Sprintf("%v", v))
+			}
+			return strings.NewReader(body.Encode()), nil
+		case string:
+			return strings.NewReader(value), nil
+		default:
+			switch reflect.TypeOf(value).Kind() {
+			case reflect.Struct,
+				reflect.Map,
+				reflect.Slice,
+				reflect.Array:
+				bs, err := json.Marshal(value)
+				return bytes.NewBuffer(bs), err
+			default:
+				return strings.NewReader(""), nil
+			}
+		}
+	}
 }
 
 //do
@@ -165,15 +212,7 @@ func Request(c Config) (goxios *Goxios) {
 	goxios = &Goxios{}
 	method := strings.ToUpper(c.Method)
 	uri := goxios.paramsURL(c.Url, c.Params)
-	switch method {
-	case "GET":
-		goxios.res, goxios.err = http.NewRequest(method, uri, nil)
-	case "POST", "PUT", "DELETE":
-		goxios.res, goxios.err = http.NewRequest(method, uri, c.Data)
-	default:
-		goxios.err = errors.New("not found method")
-		return
-	}
+	goxios.res, goxios.err = http.NewRequest(method, uri, nil)
 	if goxios.err == nil {
 		goxios.setHeaders(c.Headers)
 		goxios.do()
