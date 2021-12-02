@@ -1,3 +1,5 @@
-module github.com/Carseason/goxios
+module goxios
 
-go 1.14
+go 1.16
+
+require golang.org/x/net v0.0.0-20211201190559-0a0e4e1bb54c
