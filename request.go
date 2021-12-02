@@ -27,9 +27,13 @@ func (g *Request) Catch(f func(responseError error)) *Request {
 }
 
 // result
-func (g *Request) Finally() Finally {
-	return Finally{
+func (g *Request) Finally(f ...func(responseResult Finally)) Finally {
+	result := Finally{
 		Response: g.response,
 		Error:    g.err,
 	}
+	for i := range f {
+		f[i](result)
+	}
+	return result
 }
