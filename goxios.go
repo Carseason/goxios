@@ -50,6 +50,11 @@ func Do(option RequestConfig) (dast *Request) {
 		dast.err = err
 		return
 	}
-	dast.response, dast.err = NewResponse(resp)
+	response, err := NewResponse(resp)
+	if err != nil {
+		dast.err = err
+	} else {
+		dast.response = response
+	}
 	return
 }

@@ -16,13 +16,17 @@ type Finally struct {
 
 //success
 func (g *Request) Then(f func(responseData Response)) *Request {
-	f(g.response)
+	if g.err == nil {
+		f(g.response)
+	}
 	return g
 }
 
 //failing
 func (g *Request) Catch(f func(responseError error)) *Request {
-	f(g.err)
+	if g.err != nil {
+		f(g.err)
+	}
 	return g
 }
 
