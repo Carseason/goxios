@@ -9,11 +9,11 @@ import (
 
 const (
 	// Method
-	GET    = "GET"
-	POST   = "POST"
-	PUT    = "PUT"
-	PATCH  = "PATCH"
-	DELETE = "DELETE"
+	GetMethod    = "GET"
+	PostMethod   = "POST"
+	PutMethod    = "PUT"
+	PatchMethod  = "PATCH"
+	DeleteMethod = "DELETE"
 	//
 	ContentTypeJSON = "application/json"
 	ContentTypeText = "application/x-www-form-urlencoded"

@@ -7,7 +7,7 @@ import (
 
 func TestGet(t *testing.T) {
 	Do(RequestConfig{
-		Method: GET,
+		Method: GetMethod,
 		Url:    "https://www.baidu.com",
 		Params: NewParams(Params{
 			"a": 1,

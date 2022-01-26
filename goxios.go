@@ -7,12 +7,8 @@ import (
 
 func Do(option RequestConfig) (dast *Request) {
 	option.Method = strings.ToUpper(option.Method)
-	switch option.Method {
-	case GET, POST, PATCH, PUT, DELETE:
-	default:
-		if option.Method == "" {
-			option.Method = GET
-		}
+	if option.Method == "" {
+		option.Method = GetMethod
 	}
 	dast = new(Request)
 	if err := option.params(); err != nil {
