@@ -2,4 +2,8 @@ module github.com/Carseason/goxios
 
 go 1.16
 
-require golang.org/x/net v0.0.0-20211201190559-0a0e4e1bb54c
+require (
+	github.com/andybalholm/cascadia v1.3.1
+	golang.org/x/net v0.5.0
+	golang.org/x/text v0.6.0
+)

@@ -1,86 +1,59 @@
 package goxios
 
 import (
-	"crypto/tls"
 	"encoding/json"
-	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
-	"net/url"
-	"regexp"
 )
 
 type Response struct {
-	Status           string
-	StatusCode       int
-	Proto            string
-	ProtoMajor       int
-	ProtoMinor       int
-	Header           http.Header
-	ContentLength    int64
-	TransferEncoding []string
-	Close            bool
-	Uncompressed     bool
-	Trailer          http.Header
-	Request          *http.Request
-	TLS              *tls.ConnectionState
-	Body             []byte
+	body []byte
+	*http.Response
+	Redirect Redirect
+	*Node
 }
 
-func NewResponse(resp *http.Response) (Response, error) {
+func newResponse(resp *http.Response, redirect Redirect) (*Response, error) {
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return Response{}, err
+		return nil, err
 	}
-	return Response{
-		Status:           resp.Status,
-		StatusCode:       resp.StatusCode,
-		Proto:            resp.Proto,
-		ProtoMajor:       resp.ProtoMajor,
-		ProtoMinor:       resp.ProtoMajor,
-		Header:           resp.Header,
-		ContentLength:    resp.ContentLength,
-		TransferEncoding: resp.TransferEncoding,
-		Close:            resp.Close,
-		Uncompressed:     resp.Uncompressed,
-		Trailer:          resp.Trailer,
-		Request:          resp.Request,
-		TLS:              resp.TLS,
-		Body:             body,
-	}, nil
+	if by, err := DecodeEncoding(body); err == nil {
+		body = by
+	}
+	response := &Response{
+		body:     body,
+		Redirect: redirect,
+		Response: resp,
+		Node:     newNode(body),
+	}
+	return response, err
 }
-func (r *Response) Title() string {
-	if r.Body == nil {
-		return ""
-	}
-	data := regexp.MustCompile(`<title[^>]{0,}>([^>]+)</title[^>]{0,}>`).FindSubmatch(r.Body)
-	if len(data) == 0 {
-		return ""
-	}
-	return string(data[1])
+func (r *Response) Body() []byte {
+	return r.body
 }
 func (r *Response) Content() string {
-	return string(r.Body)
-}
-func (r *Response) Decoder(dast interface{}) error {
-	return json.Unmarshal(r.Body, dast)
+	return string(r.Body())
 }
 func (r *Response) Cookies() []*http.Cookie {
-	if r.Request == nil {
-		return nil
-	}
-	return r.Request.Cookies()
+	return r.Response.Cookies()
 }
-func (r *Response) Cookie(name string) (*http.Cookie, error) {
-	if r.Request == nil {
-		return nil, errors.New("request is nil")
-	}
-	return r.Request.Cookie(name)
+func (r *Response) StatusCode() int {
+	return r.Response.StatusCode
 }
-func (r *Response) URL() *url.URL {
-	if r.Request == nil {
-		return new(url.URL)
+
+// 是否重定向
+func (r *Response) IsRedirect() bool {
+	if r.Redirect.IsRedirect() {
+		return true
 	}
-	return r.Request.URL
+	return isRedirect(r.StatusCode())
+}
+func (r *Response) JSON(obj interface{}) error {
+	return json.Unmarshal(r.Body(), obj)
+}
+func (r *Response) Title() string {
+	title, _ := r.QueryText("title")
+	return title
 }

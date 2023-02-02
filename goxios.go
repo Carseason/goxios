@@ -1,56 +1,8 @@
 package goxios
 
-import (
-	"net/http"
-	"strings"
+const (
+	ContentTypeJSON = "application/json"
+	ContentTypeText = "application/x-www-form-urlencoded"
+	UserAgentKey    = "User-Agent"
+	UserAgentValue  = "Mozilla/5.0 (Linux; Android 8.0.0; Pixel 2 XL Build/OPD1.170816.004) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Mobile Safari/537.36"
 )
-
-func Do(option RequestConfig) (dast *Request) {
-	option.Method = strings.ToUpper(option.Method)
-	if option.Method == "" {
-		option.Method = GetMethod
-	}
-	dast = new(Request)
-	if err := option.params(); err != nil {
-		dast.err = err
-		return
-	}
-	//
-	req, err := http.NewRequest(option.Method, option.Url, option.Data)
-	if err != nil {
-		dast.err = err
-		return
-	}
-	// cookie
-	if option.Cookies != nil {
-		for _, k := range option.Cookies {
-			req.AddCookie(k)
-		}
-	}
-	//
-	dast.request = req
-	// header
-	dast.request.Header = option.Header
-	client := &http.Client{}
-	// socks5
-	if option.Transport != nil {
-		client.Transport = option.Transport
-	}
-	// timeout
-	if option.Timeout > 0 {
-		client.Timeout = option.Timeout
-	}
-	// do
-	resp, err := client.Do(dast.request)
-	if err != nil {
-		dast.err = err
-		return
-	}
-	response, err := NewResponse(resp)
-	if err != nil {
-		dast.err = err
-	} else {
-		dast.response = response
-	}
-	return
-}
