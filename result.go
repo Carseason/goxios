@@ -13,15 +13,15 @@ func newResult(resp *Response, err error) *Result {
 }
 
 // success
-func (g Result) Then(f func(resp Response)) Result {
+func (g *Result) Then(f func(resp *Response)) *Result {
 	if g.Error == nil {
-		f(*g.Response)
+		f(g.Response)
 	}
 	return g
 }
 
 // failing
-func (g Result) Catch(f func(respError error)) Result {
+func (g *Result) Catch(f func(respError error)) *Result {
 	if g.Error != nil {
 		f(g.Error)
 	}
@@ -29,9 +29,9 @@ func (g Result) Catch(f func(respError error)) Result {
 }
 
 // result
-func (g Result) Finally(fs ...func(Response, error)) (Response, error) {
+func (g *Result) Finally(fs ...func(*Response, error)) (*Response, error) {
 	for i := range fs {
-		fs[i](*g.Response, g.Error)
+		fs[i](g.Response, g.Error)
 	}
-	return *g.Response, nil
+	return g.Response, nil
 }
