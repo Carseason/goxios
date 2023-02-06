@@ -33,5 +33,5 @@ func (g *Result) Finally(fs ...func(*Response, error)) (*Response, error) {
 	for i := range fs {
 		fs[i](g.Response, g.Error)
 	}
-	return g.Response, nil
+	return g.Response, g.Error
 }

@@ -34,7 +34,7 @@ func TestGoxios(t *testing.T) {
 		Header: header,
 	})
 	var resp *Result
-	var url = "https://www.baidu.com"
+	var url = "https://www.baidu.com/"
 	switch strings.ToUpper("GET") {
 	case string(POST_):
 		var body io.Reader = nil
