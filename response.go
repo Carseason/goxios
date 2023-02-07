@@ -7,8 +7,8 @@ import (
 )
 
 type Response struct {
-	body []byte
-	*http.Response
+	body     []byte
+	resp     *http.Response
 	Redirect Redirect
 	*Node
 }
@@ -25,7 +25,7 @@ func newResponse(resp *http.Response, redirect Redirect) (*Response, error) {
 	response := &Response{
 		body:     body,
 		Redirect: redirect,
-		Response: resp,
+		resp:     resp,
 		Node:     newNode(body),
 	}
 	return response, err
@@ -37,10 +37,10 @@ func (r *Response) Content() string {
 	return string(r.Body())
 }
 func (r *Response) Cookies() []*http.Cookie {
-	return r.Response.Cookies()
+	return r.resp.Cookies()
 }
 func (r *Response) StatusCode() int {
-	return r.Response.StatusCode
+	return r.resp.StatusCode
 }
 
 // 是否重定向

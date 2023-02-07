@@ -60,8 +60,16 @@ func (nd *Node) QueryText(rule string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if node.FirstChild != nil {
-		return node.FirstChild.Data, nil
+
+	var result string
+	if node.FirstChild != nil && len(node.FirstChild.Attr) == 0 && node.FirstChild.Data != "" {
+		result = result + " " + node.FirstChild.Data
+	}
+	if node.LastChild != nil && len(node.LastChild.Attr) == 0 && node.LastChild.Data != "" {
+		result = result + " " + node.LastChild.Data
+	}
+	if result != "" {
+		return result, nil
 	}
 	var b bytes.Buffer
 	if err := html.Render(&b, node); err != nil {
