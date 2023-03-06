@@ -55,21 +55,10 @@ func (nd *Node) QueryAll(rule string) ([]*html.Node, error) {
 	}
 	return nodes, nil
 }
-func (nd *Node) QueryText(rule string) (string, error) {
+func (nd *Node) QueryRender(rule string) (string, error) {
 	node, err := nd.Query(rule)
 	if err != nil {
 		return "", err
-	}
-
-	var result string
-	if node.FirstChild != nil && len(node.FirstChild.Attr) == 0 && node.FirstChild.Data != "" {
-		result = result + " " + node.FirstChild.Data
-	}
-	if node.LastChild != nil && len(node.LastChild.Attr) == 0 && node.LastChild.Data != "" {
-		result = result + " " + node.LastChild.Data
-	}
-	if result != "" {
-		return result, nil
 	}
 	var b bytes.Buffer
 	if err := html.Render(&b, node); err != nil {
@@ -91,14 +80,31 @@ func (nd *Node) QueryAttr(rule, tag string) (string, error) {
 	}
 	return "", nil
 }
-func (nd *Node) QueryRender(rule string) (string, error) {
+func (nd *Node) QueryText(rule string) (string, error) {
 	node, err := nd.Query(rule)
 	if err != nil {
 		return "", err
+	}
+	var result string
+	if node.FirstChild != nil && len(node.FirstChild.Attr) == 0 && node.FirstChild.Data != "" {
+		result = result + " " + node.FirstChild.Data
+	}
+	if node.LastChild != nil && len(node.LastChild.Attr) == 0 && node.LastChild.Data != "" {
+		result = result + " " + node.LastChild.Data
+	}
+	if result != "" {
+		return result, nil
 	}
 	var b bytes.Buffer
 	if err := html.Render(&b, node); err != nil {
 		return "", err
 	}
 	return b.String(), nil
+}
+func (nd *Node) QueryData(rule string) (string, error) {
+	node, err := nd.Query(rule)
+	if err != nil {
+		return "", err
+	}
+	return node.Data, nil
 }
