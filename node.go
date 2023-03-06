@@ -80,6 +80,13 @@ func (nd *Node) QueryAttr(rule, tag string) (string, error) {
 	}
 	return "", nil
 }
+func (nd *Node) QueryData(rule string) (string, error) {
+	node, err := nd.Query(rule)
+	if err != nil {
+		return "", err
+	}
+	return node.Data, nil
+}
 func (nd *Node) QueryText(rule string) (string, error) {
 	node, err := nd.Query(rule)
 	if err != nil {
@@ -101,10 +108,23 @@ func (nd *Node) QueryText(rule string) (string, error) {
 	}
 	return b.String(), nil
 }
-func (nd *Node) QueryData(rule string) (string, error) {
+func (nd *Node) QueryLastChildText(rule string) (string, error) {
 	node, err := nd.Query(rule)
 	if err != nil {
 		return "", err
 	}
-	return node.Data, nil
+	if node.LastChild != nil {
+		return node.LastChild.Data, nil
+	}
+	return "", errors.New("not found LastChild")
+}
+func (nd *Node) QueryFirstChildText(rule string) (string, error) {
+	node, err := nd.Query(rule)
+	if err != nil {
+		return "", err
+	}
+	if node.FirstChild != nil {
+		return node.FirstChild.Data, nil
+	}
+	return "", errors.New("not found FirstChild")
 }
