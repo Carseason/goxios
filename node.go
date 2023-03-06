@@ -91,3 +91,14 @@ func (nd *Node) QueryAttr(rule, tag string) (string, error) {
 	}
 	return "", nil
 }
+func (nd *Node) QueryRender(rule string) (string, error) {
+	node, err := nd.Query(rule)
+	if err != nil {
+		return "", err
+	}
+	var b bytes.Buffer
+	if err := html.Render(&b, node); err != nil {
+		return "", err
+	}
+	return b.String(), nil
+}
